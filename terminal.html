@@ -1,0 +1,846 @@
+
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SCP — S-COM SOFTWARE v1.3</title>
+
+<style>
+:root {
+    --bg:#080808;
+    --panel:#222;
+    --white:#ededed;
+    --red:#d83232;
+    --yellow:#e5c54a;
+    --green:#42c875;
+}
+
+* {
+    box-sizing:border-box;
+}
+
+body {
+    margin:0;
+    background:var(--bg);
+    color:var(--white);
+    font-family:"Courier New",monospace;
+    overflow-x:hidden;
+}
+
+/* HEADER */
+
+.header {
+    min-height:105px;
+    background:#202020;
+    border-bottom:7px solid #eee;
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    padding:12px 22px;
+}
+
+.logo {
+    display:flex;
+    align-items:center;
+    gap:12px;
+}
+
+.logo-image {
+    width:65px;
+    height:65px;
+    object-fit:contain;
+    display:block;
+    flex-shrink:0;
+}
+
+.logo-text h1 {
+    font-family:Arial,sans-serif;
+    font-size:55px;
+    margin:0;
+    font-weight:900;
+    line-height:1;
+}
+
+.logo-text small {
+    display:block;
+    font-size:11px;
+    font-weight:bold;
+}
+
+.brand {
+    font-size:18px;
+    font-weight:bold;
+    letter-spacing:2px;
+}
+
+.exit {
+    border:2px solid #eee;
+    color:white;
+    background:transparent;
+    padding:10px 24px;
+    font-family:inherit;
+    font-weight:bold;
+    cursor:pointer;
+}
+
+/* DECORATION */
+
+.stripe {
+    height:32px;
+    width:100%;
+    background:repeating-linear-gradient(
+        120deg,
+        #eee 0px,
+        #eee 12px,
+        #222 12px,
+        #222 25px
+    );
+    clip-path:polygon(0 0,42% 0,38% 100%,0 100%);
+}
+
+/* LAYOUT */
+
+.container {
+    display:grid;
+    grid-template-columns:270px 1fr;
+    min-height:calc(100vh - 137px);
+}
+
+.sidebar {
+    background:#222;
+    border-right:6px solid #eee;
+    padding:25px 20px;
+}
+
+.side-title {
+    font-size:12px;
+    color:#aaa;
+    margin-bottom:8px;
+}
+
+.info {
+    font-size:13px;
+    font-weight:bold;
+    line-height:1.8;
+    margin-bottom:35px;
+}
+
+/* TERMINAL */
+
+.terminal {
+    background:#050505;
+    padding:20px;
+    min-width:0;
+    overflow:hidden;
+    position:relative;
+}
+
+.terminal::after {
+    content:"";
+    pointer-events:none;
+    position:absolute;
+    inset:0;
+    background:repeating-linear-gradient(
+        transparent 0px,
+        rgba(255,255,255,.018) 1px,
+        transparent 2px,
+        transparent 4px
+    );
+    z-index:5;
+}
+
+.terminal-content {
+    position:relative;
+    z-index:2;
+    min-height:400px;
+}
+
+.status {
+    font-size:12px;
+    line-height:1.9;
+    margin-bottom:25px;
+}
+
+.red {color:var(--red);}
+.green {color:var(--green);}
+.yellow {color:var(--yellow);}
+.white {color:var(--white);}
+
+/* MESSAGES */
+
+.message {
+    margin:13px 0;
+    font-size:13px;
+    line-height:1.7;
+    white-space:pre-wrap;
+    overflow-wrap:anywhere;
+    animation:appear .3s ease;
+}
+
+.sender {
+    font-weight:bold;
+}
+
+@keyframes appear {
+    from {
+        opacity:0;
+        transform:translateY(5px);
+    }
+    to {
+        opacity:1;
+        transform:translateY(0);
+    }
+}
+
+/* CURSOR */
+
+.cursor {
+    display:inline-block;
+    width:7px;
+    height:14px;
+    background:#eee;
+    animation:blink .8s infinite;
+    vertical-align:middle;
+}
+
+@keyframes blink {
+    50% {opacity:0;}
+}
+
+/* CONSOLE BUTTON */
+
+.console-toggle {
+    position:relative;
+    z-index:10;
+    display:block;
+    margin:0 0 12px auto;
+    padding:9px 15px;
+    background:#222;
+    color:#eee;
+    border:1px solid #777;
+    font-family:inherit;
+    font-size:11px;
+    font-weight:bold;
+    cursor:pointer;
+}
+
+.console-toggle:hover {
+    background:#eee;
+    color:#000;
+}
+
+/* EDITOR */
+
+.editor {
+    background:#191919;
+    border-top:2px solid #555;
+    padding:20px;
+    margin-top:30px;
+    position:relative;
+    z-index:6;
+}
+
+.editor.hidden {
+    display:none;
+}
+
+.editor h3 {
+    font-size:13px;
+    margin:0 0 18px;
+    letter-spacing:2px;
+}
+
+label {
+    display:block;
+    font-size:11px;
+    color:#aaa;
+    margin:12px 0 6px;
+}
+
+input,textarea,select {
+    width:100%;
+    background:#080808;
+    color:white;
+    border:1px solid #777;
+    padding:11px;
+    font-family:inherit;
+    font-size:13px;
+    outline:none;
+    border-radius:0;
+}
+
+input:focus,
+textarea:focus,
+select:focus {
+    border-color:white;
+}
+
+textarea {
+    resize:vertical;
+    min-height:85px;
+}
+
+.buttons {
+    display:flex;
+    flex-wrap:wrap;
+    gap:8px;
+    margin-top:15px;
+}
+
+.action {
+    border:1px solid #eee;
+    background:transparent;
+    color:white;
+    padding:11px 16px;
+    font-size:11px;
+    font-family:inherit;
+    font-weight:bold;
+    cursor:pointer;
+}
+
+.action:hover {
+    background:#eee;
+    color:black;
+}
+
+.send {
+    background:#eee;
+    color:#000;
+}
+
+.footer {
+    font-size:10px;
+    color:#666;
+    margin-top:25px;
+    letter-spacing:1px;
+    line-height:1.8;
+}
+
+/* MOBILE */
+
+@media(max-width:650px) {
+
+    .header {
+        min-height:85px;
+        padding:10px;
+        gap:8px;
+    }
+
+    .logo {
+        gap:7px;
+    }
+
+    .logo-image {
+        width:42px;
+        height:42px;
+    }
+
+    .logo-text h1 {
+        font-size:36px;
+    }
+
+    .logo-text small {
+        font-size:8px;
+    }
+
+    .brand {
+        font-size:10px;
+        letter-spacing:1px;
+        text-align:center;
+    }
+
+    .exit {
+        padding:8px;
+        font-size:10px;
+    }
+
+    .container {
+        grid-template-columns:1fr;
+    }
+
+    .sidebar {
+        border-right:none;
+        border-bottom:4px solid #eee;
+        padding:15px;
+        display:grid;
+        grid-template-columns:1fr 1fr;
+        gap:10px;
+    }
+
+    .info {
+        font-size:10px;
+        margin-bottom:8px;
+    }
+
+    .side-title {
+        font-size:10px;
+    }
+
+    .terminal {
+        padding:15px;
+    }
+
+    .message {
+        font-size:11px;
+    }
+
+    .status {
+        font-size:10px;
+    }
+}
+</style>
+</head>
+
+<body>
+
+<!-- HEADER -->
+
+<header class="header">
+
+    <div class="logo">
+
+        <!-- GANTI logo.png DENGAN NAMA FILE GAMBAR MILIKMU -->
+
+        <img
+            src="SCP_Foundation_(emblem).svg.webp"
+            alt="SCP Logo"
+            class="logo-image"
+        >
+
+        <div class="logo-text">
+            <h1>SCP</h1>
+            <small>Secure. Contain. Protect.</small>
+        </div>
+
+    </div>
+
+    <div class="brand">
+        S-COM SOFTWARE v1.3
+    </div>
+
+    <button class="exit" onclick="exitTerminal()">
+        EXIT
+    </button>
+
+</header>
+
+<div class="stripe"></div>
+
+<!-- MAIN -->
+
+<div class="container">
+
+    <!-- SIDEBAR -->
+
+    <aside class="sidebar">
+
+        <div>
+            <div class="side-title">Reception</div>
+            <div class="info">
+                ALL-256 CH<br>
+                FREE TRANSMIT
+            </div>
+        </div>
+
+        <div>
+            <div class="side-title">Source</div>
+            <div class="info">
+                ELEMENT-3-A
+            </div>
+        </div>
+
+        <div>
+            <div class="side-title">Client</div>
+            <div class="info" id="clientDisplay">
+                USER_001
+            </div>
+        </div>
+
+        <div>
+            <div class="side-title">System</div>
+            <div class="info">
+                IMG_API: 1<br>
+                TTL = 30<br>
+                PING = 51.8 ms
+            </div>
+        </div>
+
+    </aside>
+
+    <!-- TERMINAL -->
+
+    <main class="terminal">
+
+        <div class="terminal-content">
+
+            <div class="status">
+
+                <div class="red">
+                    [!] WARNING: UNAUTHORIZED ACCESS DETECTED
+                </div>
+
+                <div class="green">
+                    [OK] SYSTEM CONNECTION ESTABLISHED
+                </div>
+
+                <div class="green">
+                    [OK] SECURE TRANSMISSION CHANNEL ACTIVE
+                </div>
+
+                <br>
+
+                SYSTEM STATUS:
+                <span class="green">CONNECTED</span>
+
+                <br>
+
+                NETWORK:
+                <span class="yellow">SECURE</span>
+
+                <br><br>
+
+                <div class="red">
+                    [!] REMINDER: ALL TRANSMISSIONS ARE MONITORED
+                </div>
+
+                <div class="red">
+                    [!] CLASSIFIED INFORMATION MUST NOT BE DISTRIBUTED
+                </div>
+
+            </div>
+
+            <div id="output"></div>
+
+            <span class="cursor" id="cursor"></span>
+
+        </div>
+
+        <!-- CONSOLE TOGGLE -->
+
+        <button
+            class="console-toggle"
+            id="toggleButton"
+            onclick="toggleConsole()">
+            HIDE CONSOLE [-]
+        </button>
+
+        <!-- MESSAGE EDITOR -->
+
+        <section class="editor" id="editorPanel">
+
+            <h3>TRANSMISSION CONSOLE</h3>
+
+            <label>USERNAME / SENDER</label>
+
+            <input
+                type="text"
+                id="username"
+                value="USER_001"
+                maxlength="30"
+                placeholder="Enter username">
+
+            <label>MESSAGE CONTENT</label>
+
+            <textarea
+                id="messageInput"
+                placeholder="Enter your transmission..."></textarea>
+
+            <label>MESSAGE COLOR</label>
+
+            <select id="messageColor">
+                <option value="white">WHITE</option>
+                <option value="red">RED</option>
+                <option value="yellow">YELLOW</option>
+            </select>
+
+            <div class="buttons">
+
+                <button class="action send" onclick="sendMessage()">
+                    SEND MESSAGE
+                </button>
+
+                <button class="action" onclick="replayMessages()">
+                    REPLAY
+                </button>
+
+                <button class="action" onclick="clearMessages()">
+                    CLEAR
+                </button>
+
+            </div>
+
+            <div class="footer">
+                SCP FOUNDATION // S-COM COMMUNICATION SYSTEM
+                <br>
+                SECURE TRANSMISSION PROTOCOL v1.3
+            </div>
+
+        </section>
+
+    </main>
+
+</div>
+
+<script>
+
+// ELEMENTS
+
+const output = document.getElementById("output");
+const username = document.getElementById("username");
+const messageInput = document.getElementById("messageInput");
+const messageColor = document.getElementById("messageColor");
+const clientDisplay = document.getElementById("clientDisplay");
+const cursor = document.getElementById("cursor");
+const editorPanel = document.getElementById("editorPanel");
+const toggleButton = document.getElementById("toggleButton");
+
+// STORAGE
+
+let messages = [];
+let typing = false;
+let replayToken = 0;
+
+// USERNAME
+
+username.addEventListener("input", () => {
+    clientDisplay.textContent =
+        username.value.trim() || "UNKNOWN_USER";
+});
+
+// HIDE / SHOW CONSOLE
+
+function toggleConsole() {
+
+    editorPanel.classList.toggle("hidden");
+
+    if (editorPanel.classList.contains("hidden")) {
+
+        toggleButton.textContent = "OPEN CONSOLE [+]";
+
+    } else {
+
+        toggleButton.textContent = "HIDE CONSOLE [-]";
+
+    }
+}
+
+// TYPEWRITER EFFECT
+
+function typeText(element, text, speed, token) {
+
+    return new Promise(resolve => {
+
+        let index = 0;
+
+        function type() {
+
+            if (token !== replayToken) {
+                resolve();
+                return;
+            }
+
+            if (index < text.length) {
+
+                element.textContent += text[index];
+
+                index++;
+
+                window.scrollTo({
+                    top:document.body.scrollHeight,
+                    behavior:"smooth"
+                });
+
+                setTimeout(type,speed);
+
+            } else {
+
+                resolve();
+
+            }
+        }
+
+        type();
+
+    });
+
+}
+
+// PRINT MESSAGE
+
+async function printMessage(data,token) {
+
+    if (token !== replayToken) return;
+
+    const line = document.createElement("div");
+
+    line.className = "message " + data.color;
+
+    const sender = document.createElement("span");
+    sender.className = "sender";
+
+    const content = document.createElement("span");
+
+    line.appendChild(sender);
+    line.appendChild(content);
+
+    output.appendChild(line);
+
+    await typeText(
+        sender,
+        "[" + data.username + "] ",
+        35,
+        token
+    );
+
+    if (token !== replayToken) return;
+
+    await typeText(
+        content,
+        data.message,
+        22,
+        token
+    );
+
+}
+
+// SEND MESSAGE
+
+async function sendMessage() {
+
+    if (typing) return;
+
+    const name =
+        username.value.trim() || "UNKNOWN_USER";
+
+    const text =
+        messageInput.value.trim();
+
+    if (!text) {
+        alert("Please enter a message.");
+        return;
+    }
+
+    const data = {
+        username:name,
+        message:text,
+        color:messageColor.value
+    };
+
+    messages.push(data);
+
+    typing = true;
+    cursor.style.display = "none";
+
+    const token = replayToken;
+
+    await printMessage(data,token);
+
+    if (token === replayToken) {
+
+        messageInput.value = "";
+
+        cursor.style.display = "inline-block";
+        typing = false;
+
+    }
+
+}
+
+// REPLAY
+
+async function replayMessages() {
+
+    if (typing || messages.length === 0) return;
+
+    typing = true;
+
+    replayToken++;
+
+    const token = replayToken;
+
+    output.innerHTML = "";
+
+    cursor.style.display = "none";
+
+    for (const data of messages) {
+
+        if (token !== replayToken) break;
+
+        await printMessage(data,token);
+
+        if (token !== replayToken) break;
+
+        await new Promise(resolve =>
+            setTimeout(resolve,500)
+        );
+
+    }
+
+    if (token === replayToken) {
+
+        cursor.style.display = "inline-block";
+        typing = false;
+
+    }
+
+}
+
+// CLEAR
+
+function clearMessages() {
+
+    if (typing) return;
+
+    messages = [];
+    output.innerHTML = "";
+
+}
+
+// EXIT
+
+function exitTerminal() {
+
+    if (confirm("Terminate S-COM communication session?")) {
+
+        document.body.innerHTML = `
+        <div style="
+            background:#000;
+            color:#d83232;
+            height:100vh;
+            display:flex;
+            align-items:center;
+            justify-content:center;
+            text-align:center;
+            font-family:monospace;
+            flex-direction:column;
+        ">
+            <h2>CONNECTION TERMINATED</h2>
+            <p>S-COM SOFTWARE SESSION CLOSED</p>
+            <p style="color:#777">
+                SCP FOUNDATION // SECURE SYSTEM
+            </p>
+        </div>
+        `;
+
+    }
+
+}
+
+// ENTER TO SEND
+
+messageInput.addEventListener("keydown",event => {
+
+    if (event.key === "Enter" && !event.shiftKey) {
+
+        event.preventDefault();
+        sendMessage();
+
+    }
+
+});
+
+</script>
+
+</body>
+</html>
